@@ -1,8 +1,17 @@
+###############################
+#  Imports for reading keyboard
+##############################
 import sys, os
 import termios, fcntl
-import select
+
+# Time is used in our main loop for delay functionality.
 import time
 
+################################
+#  Initialize keyboard reading. 
+#  Save the old terminal configuration, and
+#  tweak the terminal so that it doesn't echo, and doesn't block.
+################################
 fd = sys.stdin.fileno()
 newattr = termios.tcgetattr(fd)
 
@@ -16,7 +25,10 @@ fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
 
 termios.tcsetattr(fd, termios.TCSANOW, newattr)
 
-def getch_glenn():
+##################################
+# Non-blocking character read function.
+#################################
+def getch_noblock():
   try:
     return sys.stdin.read()
   except (IOError, TypeError) as e:
@@ -24,7 +36,7 @@ def getch_glenn():
 
 print "Type some stuff"
 while True:
-  key = getch_glenn()
+  key = getch_noblock()
   if key == 'q':
      break    
   if key:
@@ -34,6 +46,9 @@ while True:
 
   time.sleep(.2)
 
-# Reset the terminal:
+###################################
+# Reset the terminal on exit
+###################################
 termios.tcsetattr(fd, termios.TCSANOW, oldterm)
+
 fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
